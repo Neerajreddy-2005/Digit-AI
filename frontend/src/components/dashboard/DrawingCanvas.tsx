@@ -2,7 +2,6 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
 import { 
   Trash2, 
   Download, 
@@ -12,15 +11,14 @@ import {
   Palette 
 } from "lucide-react";
 
+const API_BASE = (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+
 const DrawingCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [prediction, setPrediction] = useState<{
-    digit: number;
-    confidence: number;
-  } | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [brushSize, setBrushSize] = useState(8);
+  const [isLoading, setIsLoading] = useState(false);
+  const [prediction, setPrediction] = useState<string | number | null>(null);
+  const [brushSize, setBrushSize] = useState(24);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -33,16 +31,16 @@ const DrawingCanvas = () => {
     canvas.width = 400;
     canvas.height = 400;
 
-    // Set drawing properties
+    // Set drawing styles
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = brushSize;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = brushSize;
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, [brushSize]);
 
-  const startDrawing = useCallback((e: React.MouseEvent) => {
+  const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -58,7 +56,7 @@ const DrawingCanvas = () => {
     ctx.moveTo(x, y);
   }, []);
 
-  const draw = useCallback((e: React.MouseEvent) => {
+  const draw = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
 
     const canvas = canvasRef.current;
@@ -77,6 +75,11 @@ const DrawingCanvas = () => {
 
   const stopDrawing = useCallback(() => {
     setIsDrawing(false);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.beginPath();
   }, []);
 
   const clearCanvas = () => {
@@ -86,10 +89,9 @@ const DrawingCanvas = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     setPrediction(null);
-    toast.success("Canvas cleared!");
   };
 
   const downloadCanvas = () => {
@@ -101,32 +103,31 @@ const DrawingCanvas = () => {
     link.download = "digit-drawing.png";
     link.href = canvas.toDataURL();
     link.click();
-    
-    toast.success("Drawing downloaded!");
   };
 
-  const analyzeDigit = async () => {
+  const predictDigit = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    setIsAnalyzing(true);
-    
+    setIsLoading(true);
     try {
-      // Simulate API call to backend ML model
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock prediction result
-      const mockPrediction = {
-        digit: Math.floor(Math.random() * 10),
-        confidence: 0.85 + Math.random() * 0.14 // 85-99% confidence
-      };
-      
-      setPrediction(mockPrediction);
-      toast.success(`Detected digit: ${mockPrediction.digit}`);
-    } catch (error) {
-      toast.error("Failed to analyze digit. Please try again.");
+      const dataUrl = canvas.toDataURL("image/png");
+      const res = await fetch(`${API_BASE}/predict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataUrl, multi: true }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Request failed");
+
+      const display = typeof data.sequence === "string" && data.sequence.length > 0
+        ? data.sequence
+        : data.prediction;
+      setPrediction(display);
+    } catch (err: any) {
+      console.error("Prediction failed:", err);
     } finally {
-      setIsAnalyzing(false);
+      setIsLoading(false);
     }
   };
 
@@ -145,7 +146,7 @@ const DrawingCanvas = () => {
           <div className="flex items-center space-x-4">
             <span className="text-sm font-medium">Brush Size:</span>
             <div className="flex space-x-2">
-              {[4, 8, 12, 16].map((size) => (
+              {[12, 18, 24, 30].map((size) => (
                 <Button
                   key={size}
                   size="sm"
@@ -163,7 +164,7 @@ const DrawingCanvas = () => {
           <div className="flex justify-center">
             <canvas
               ref={canvasRef}
-              className="canvas-board border-2 border-border/50"
+              className="canvas-board border-2 border-border/50 cursor-crosshair"
               onMouseDown={startDrawing}
               onMouseMove={draw}
               onMouseUp={stopDrawing}
@@ -194,16 +195,16 @@ const DrawingCanvas = () => {
             </Button>
             
             <Button
-              onClick={analyzeDigit}
-              disabled={isAnalyzing}
+              onClick={predictDigit}
+              disabled={isLoading}
               className="bg-primary hover:bg-primary/90 glow-effect smooth-transition flex-1"
             >
-              {isAnalyzing ? (
+              {isLoading ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <Brain className="h-4 w-4 mr-2" />
               )}
-              {isAnalyzing ? "Analyzing..." : "Analyze Digit"}
+              {isLoading ? "Analyzing..." : "Analyze Digit"}
             </Button>
           </div>
         </CardContent>
@@ -218,13 +219,13 @@ const DrawingCanvas = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {prediction ? (
+          {prediction !== null ? (
             <div className="space-y-6 animate-fade-in">
               {/* Predicted Digit */}
               <div className="text-center space-y-4">
                 <div className="relative">
                   <div className="text-8xl font-bold hero-gradient mx-auto w-fit animate-glow-pulse">
-                    {prediction.digit}
+                    {prediction}
                   </div>
                   <CheckCircle className="absolute -top-2 -right-2 h-8 w-8 text-green-500" />
                 </div>
@@ -233,22 +234,6 @@ const DrawingCanvas = () => {
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Recognized
                 </Badge>
-              </div>
-
-              {/* Confidence */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Confidence</span>
-                  <span className="text-sm text-muted-foreground">
-                    {(prediction.confidence * 100).toFixed(1)}%
-                  </span>
-                </div>
-                <div className="w-full bg-secondary rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full smooth-transition"
-                    style={{ width: `${prediction.confidence * 100}%` }}
-                  />
-                </div>
               </div>
 
               {/* Model Info */}

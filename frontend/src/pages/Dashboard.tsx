@@ -22,7 +22,7 @@ const Dashboard = () => {
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Draw any digit (0-9) on the black canvas below and watch our AI model analyze and predict your handwriting in real-time.
+              Draw any digit (0-9) or multiple digits on the black canvas below and watch our AI model analyze and predict your handwriting in real-time.
             </p>
           </div>
 
@@ -42,10 +42,11 @@ const Dashboard = () => {
                 <h3 className="font-semibold">How to Use</h3>
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li>1. Choose your preferred brush size using the size controls</li>
-                  <li>2. Draw a single digit (0-9) on the black canvas with your mouse</li>
+                  <li>2. Draw one or more digits (0-9) on the black canvas with your mouse</li>
                   <li>3. Click "Analyze Digit" to let our AI model predict your drawing</li>
                   <li>4. View the results with confidence scores in the right panel</li>
-                  <li>5. Clear the canvas to try again or download your drawing</li>
+                  <li>5. For multiple digits, see individual confidence scores for each digit</li>
+                  <li>6. Clear the canvas to try again or download your drawing</li>
                 </ul>
               </div>
             </div>

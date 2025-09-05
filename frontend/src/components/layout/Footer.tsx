@@ -1,4 +1,4 @@
-import { Brain, Github, Twitter, Mail } from "lucide-react";
+import { Brain, Github, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Footer = () => {
@@ -51,13 +51,20 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">Connect</h3>
             <div className="flex space-x-2">
-              <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-accent/50 smooth-transition">
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                className="h-8 w-8 hover:bg-accent/50 smooth-transition"
+                onClick={() => window.open('https://github.com/Neerajreddy-2005/Digit-AI', '_blank')}
+              >
                 <Github className="h-4 w-4" />
               </Button>
-              <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-accent/50 smooth-transition">
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-accent/50 smooth-transition">
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                className="h-8 w-8 hover:bg-accent/50 smooth-transition"
+                onClick={() => window.open('mailto:dvenkatneerajreddy10@gmail.com', '_blank')}
+              >
                 <Mail className="h-4 w-4" />
               </Button>
             </div>
@@ -65,7 +72,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-8 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 DigitAI. All rights reserved. Built with ❤️ and AI.</p>
+          <p>&copy; 2025 DigitAI. All rights reserved.</p>
         </div>
       </div>
     </footer>
