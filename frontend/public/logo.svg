@@ -1,0 +1,20 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background with gradient and rounded corners -->
+  <rect width="32" height="32" rx="8" ry="8" fill="url(#gradient)"/>
+  
+  <!-- Simplified Brain icon -->
+  <path d="M8 12C8 10 9 9 10 9C11 9 12 10 12 12C12 14 11 15 10 15C9 15 8 14 8 12Z" fill="white"/>
+  <path d="M20 12C20 10 21 9 22 9C23 9 24 10 24 12C24 14 23 15 22 15C21 15 20 14 20 12Z" fill="white"/>
+  <path d="M10 18C10 16 11 15 12 15C13 15 14 16 14 18C14 20 13 21 12 21C11 21 10 20 10 18Z" fill="white"/>
+  <path d="M18 18C18 16 19 15 20 15C21 15 22 16 22 18C22 20 21 21 20 21C19 21 18 20 18 18Z" fill="white"/>
+  <path d="M14 18C14 17 14.5 16.5 15 16.5C15.5 16.5 16 17 16 18C16 19 15.5 19.5 15 19.5C14.5 19.5 14 19 14 18Z" fill="white"/>
+  <path d="M6 14C6 12 7 11 8 11C9 11 10 12 10 14C10 16 9 17 8 17C7 17 6 16 6 14Z" fill="white"/>
+  <path d="M22 14C22 12 23 11 24 11C25 11 26 12 26 14C26 16 25 17 24 17C23 17 22 16 22 14Z" fill="white"/>
+</svg>
