@@ -124,6 +124,8 @@ Create `frontend/.env.local`:
 VITE_API_URL=http://localhost:5000
 ```
 
+**Note**: Both local development and production now use port 5000 by default, which ensures consistency.
+
 ## Testing Your Deployment
 
 ### Local Testing

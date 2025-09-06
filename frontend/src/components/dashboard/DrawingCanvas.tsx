@@ -11,7 +11,7 @@ import {
   Palette 
 } from "lucide-react";
 
-const API_BASE = (import.meta as any).env?.VITE_API_URL || "http://localhost:5010";
+const API_BASE = (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
 const DrawingCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
