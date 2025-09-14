@@ -2,16 +2,20 @@ import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"  # suppress INFO/WARNING logs from TF
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"  # silence oneDNN numeric differences note
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, send_file
 from tensorflow.keras.models import load_model
 import numpy as np
 from PIL import Image
 import io
 import base64
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app)
+
+# Serve static files from the frontend build directory
+FRONTEND_BUILD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend', 'dist')
 
 # Lazy-load the model to avoid long startup delays
 MODEL_PATH = "mnist_cnn.keras"
@@ -117,7 +121,11 @@ def segment_digits_from_gray(gray_arr_01: np.ndarray) -> list:
 
 @app.route("/")
 def index():
-	return jsonify({"status": "ok", "message": "MNIST inference API is running"})
+    """Serve the main SPA page"""
+    if os.path.exists(FRONTEND_BUILD_DIR):
+        return send_file(os.path.join(FRONTEND_BUILD_DIR, 'index.html'))
+    else:
+        return jsonify({"status": "ok", "message": "MNIST inference API is running"})
 
 
 @app.route("/health")
@@ -178,6 +186,17 @@ def predict():
 		})
 	except Exception as e:
 		return jsonify({"error": str(e)}), 500
+
+
+# Serve static files (JS, CSS, images, etc.) - This should be the last route
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve static files from the frontend build directory"""
+    if os.path.exists(os.path.join(FRONTEND_BUILD_DIR, filename)):
+        return send_from_directory(FRONTEND_BUILD_DIR, filename)
+    else:
+        # For SPA routing, serve index.html for any route that doesn't match a file
+        return send_file(os.path.join(FRONTEND_BUILD_DIR, 'index.html'))
 
 
 if __name__ == "__main__":
